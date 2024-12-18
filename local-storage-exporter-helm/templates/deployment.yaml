@@ -1,0 +1,40 @@
+{{ $metricsPort := .Values.metricsPort | required ".Values.metricsPort is required" }}
+{{ $storageClassName := .Values.storageClassName | required ".Values.storageClassName is required" }}
+{{ $storagePath := .Values.storagePath | required ".Values.storagePath is required" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: local-storage-exporter-multipass-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: local-storage-exporter
+  template:
+    metadata:
+      labels:
+        app: local-storage-exporter
+    spec:
+      serviceAccountName: local-storage-exporter-serviceaccount
+      containers:
+        - name: local-storage-exporter
+          image: local-storage-exporter:latest
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: node-data
+              mountPath: /volumes # Where it appears in container
+              readOnly: true
+          ports:
+            - containerPort: {{ $metricsPort }}
+              name: metrics
+          env:
+            - name: STORAGE_CLASS_NAME
+              value: {{ $storageClassName }}
+            - name: METRICS_PORT
+              value: {{ quote $metricsPort }}
+      volumes:
+        - name: node-data
+          hostPath:
+            path: {{ $storagePath }}
+            type: Directory # Ensures directory exists
