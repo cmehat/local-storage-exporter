@@ -18,3 +18,10 @@ imagePullPolicy: IfNotPresent
 imagePullSecrets: []
 repository: 
 tag: latest
+
+daemonSet:
+  enable: false
+
+deployment:
+  enable: true
+  replicas: 1

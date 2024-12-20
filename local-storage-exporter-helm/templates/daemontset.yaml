@@ -3,13 +3,12 @@
 {{ include "validate.imagePullPolicy" . }}
 {{ include "validate.imagePullSecrets" . }}
 ---
-{{ if .Values.deployment.enable -}}
+{{ if .Values.daemonSet.enable -}}
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
-  name: {{ .Release.Name }}-local-storage-exporter-deployment
+  name: {{ .Release.Name }}-local-storage-exporter-daemonset
 spec:
-  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}-local-storage-exporter
@@ -18,6 +17,12 @@ spec:
       labels:
         app: {{ .Release.Name }}-local-storage-exporter
     spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists        
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+
       serviceAccountName: {{ .Release.Name }}-local-storage-exporter-serviceaccount
       {{ if .Values.imagePullSecrets -}}
       imagePullSecrets:
