@@ -15,21 +15,3 @@
 {{ end }}
 {{- $metricsPort -}}
 {{ end }}
-
-{{/* Validate that each imagePullSecret has a name. */}}
-{{ define "validate.imagePullSecrets" }}
-{{ if .Values.imagePullSecrets }}
-{{ range .Values.imagePullSecrets }}
-{{ if not .name }}
-{{ fail "imagePullSecrets must have a name" }}
-{{ end }}
-{{ end }}
-{{ end }}
-{{ end }}
-
-{{/* Ensure imagePullPolicy is one of the allowed values. */}}
-{{ define "validate.imagePullPolicy" -}}
-{{ if not (or (eq .Values.imagePullPolicy "Always" ) (eq .Values.imagePullPolicy "IfNotPresent" ) (eq .Values.imagePullPolicy "Never" )) }}
-{{ fail (printf "imagePullPolicy must be one of: Always, IfNotPresent, Never (given '%s')" .Values.imagePullPolicy) }}
-{{ end }}
-{{ end }}

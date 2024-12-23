@@ -1,15 +1,12 @@
 {{ include "validate.requiredValues" . }}
 {{ $metricsPort := include "validate.metricsPort" . }}
-{{ include "validate.imagePullPolicy" . }}
-{{ include "validate.imagePullSecrets" . }}
 ---
-{{ if .Values.deployment.enable -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-local-storage-exporter-deployment
 spec:
-  replicas: {{ .Values.deployment.replicas }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}-local-storage-exporter
@@ -27,12 +24,12 @@ spec:
       {{ end -}}
       containers:
         - name: {{ .Release.Name }}-local-storage-exporter
-          {{ if .Values.repository -}}
-          image: {{ .Values.repository }}/local-storage-exporter:{{ .Values.tag }}
+          {{ if .Values.image.registry -}}
+          image: {{ .Values.image.registry }}/local-storage-exporter:{{ .Values.image.tag }}
           {{ else -}}
-          image: local-storage-exporter:{{ .Values.tag }}
+          image: local-storage-exporter:{{ .Values.image.tag }}
           {{ end -}}
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           volumeMounts:
             - name: node-data
               mountPath: /volumes # Where it appears in container
@@ -47,9 +44,20 @@ spec:
               value: {{ quote $metricsPort }}
             - name: UPDATE_INTERVAL
               value: {{ quote .Values.updateInterval }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ $metricsPort }}
+            initialDelaySeconds: 3
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ $metricsPort }}
+            initialDelaySeconds: 3
+            periodSeconds: 15
       volumes:
         - name: node-data
           hostPath:
             path: {{ .Values.storagePath }}
             type: Directory # Ensures directory exists
-{{ end -}}

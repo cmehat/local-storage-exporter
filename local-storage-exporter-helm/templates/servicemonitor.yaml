@@ -10,7 +10,7 @@ spec:
   endpoints:
   - port: metrics
     interval: {{ .Values.serviceMonitor.interval }}
-    scrapeTimeout: 10s
+    scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
