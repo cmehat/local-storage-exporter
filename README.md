@@ -16,6 +16,7 @@ docker push $REGISIRY/$PROJECT/prokube/local-storage-exporter:$PLATFORM
 ```
 
 After building the image and push it to your registry, you can deploy it using the provided helm chart after providing a values file.
+You can check `local-storage-exporter-helm/values.yaml` to see the values you can use for the helm chart.
 Example values.yaml:
 ```yaml
 # values.yaml
