@@ -1,54 +1,22 @@
 from __future__ import annotations
 import logging
 import subprocess
-import time
-import re
 import os
 from pathlib import Path
-from dataclasses import dataclass
 
 from kubernetes import client, config
-from prometheus_client import Gauge, start_http_server
 from kubernetes.client.models.v1_persistent_volume_list import V1PersistentVolumeList
 from kubernetes.client.models.v1_persistent_volume import V1PersistentVolume
 from kubernetes.client.models.v1_pod_list import V1PodList
 from kubernetes.client.models.v1_pod import V1Pod
 
-# Set up logging and create handler for info logs
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
+from . import utils, metrics
+
+
 _logger = logging.getLogger(__name__)
-_logger.setLevel(logging.INFO)
-_logger.addHandler(handler)
-
-
-# fmt: off
-# Compile the regex pattern once
-STORAGE_CAPACITY_PATTERN = re.compile(r"(\d*[,|\.]?\d+)([a-zA-Z]+)")
-STORAGE_UNITS = {
-    "Ki": 1024, "Mi": 1024**2, "Gi": 1024**3, "Ti": 1024**4, "Pi": 1024**5, "Ei": 1024**6,
-    "k": 10**3, "M": 10**6,    "G": 10**9,    "T": 10**12,   "P": 10**15,   "E": 10**18
-}
-# fmt: on
-def convert_storage_capacity_to_bytes(storage_capacity: str) -> int:
-    global STORAGE_CAPACITY_PATTERN
-    global STORAGE_UNITS
-    match = STORAGE_CAPACITY_PATTERN.match(storage_capacity)
-    if match:
-        value, unit = match.groups()
-        if unit in STORAGE_UNITS:
-            return int(float(value) * STORAGE_UNITS[unit])
-    return int(storage_capacity)
 
 
 class LocalStorageExporter:
-    pv_used_bytes_gauge: Gauge
-    pv_capacity_bytes_gauge: Gauge
-    mounted_disk_capacity_gauge: Gauge
-    mounted_disk_used_gauge: Gauge
-    mounted_disk_available_gauge: Gauge
     k8s_client: client.CoreV1Api
     storage_class_names: list[str] = []
     host_path_to_volume_mount: dict[Path, Path] = {}
@@ -70,49 +38,6 @@ class LocalStorageExporter:
         if len(self.host_path_to_volume_mount) == 0:
             _logger.error("Could not find any hostPath mounted volume.")
             raise RuntimeError("no hostPath mounted volume found")
-
-        self.pv_used_bytes_gauge = Gauge(
-            name="local_storage_pv_used_bytes",
-            documentation="The amount of bytes used by local storage volume",
-            labelnames=[
-                "node_name",
-                "pvc_name",
-                "pvc_namespace",
-                "pv_name",
-                "storage_path",
-                "pv_capacity",
-                "storage_class_name",
-            ],
-        )
-        self.pv_capacity_bytes_gauge = Gauge(
-            name="local_storage_pv_capacity_bytes",
-            documentation="The capacity of local storage volume",
-            labelnames=[
-                "node_name",
-                "pvc_name",
-                "pvc_namespace",
-                "pv_name",
-                "storage_path",
-                "pv_capacity",
-                "storage_class_name",
-            ],
-        )
-
-        self.mounted_disk_used_gauge = Gauge(
-            name="local_storage_mounted_disk_used_bytes",
-            documentation="The amount of bytes used by mounted disk",
-            labelnames=["node_name", "host_path", "volume_mount_path"],
-        )
-        self.mounted_disk_capacity_gauge = Gauge(
-            name="local_storage_mounted_disk_capacity_bytes",
-            documentation="The capacity of mounted disk",
-            labelnames=["node_name", "host_path", "volume_mount_path"],
-        )
-        self.mounted_disk_available_gauge = Gauge(
-            name="local_storage_mounted_disk_available_bytes",
-            documentation="The amount of bytes available in mounted disk",
-            labelnames=["node_name", "host_path", "volume_mount_path"],
-        )
 
         self.node_name = self.get_pod().spec.node_name
         self.storage_class_names = storage_class_names
@@ -228,9 +153,11 @@ class LocalStorageExporter:
             storage_path = (
                 pv.spec.local.path if pv.spec.local else pv.spec.host_path.path
             )
-            pv_capacity = convert_storage_capacity_to_bytes(pv.spec.capacity["storage"])
+            pv_capacity = utils.convert_storage_capacity_to_bytes(
+                pv.spec.capacity["storage"]
+            )
             storage_class_name = pv.spec.storage_class_name
-            pv_used_bytes_gauge = self.pv_used_bytes_gauge.labels(
+            pv_used_bytes_gauge = metrics.pv_used_bytes_gauge.labels(
                 node_name=self.node_name,
                 pvc_name=pvc_name,
                 pvc_namespace=pvc_namespace,
@@ -250,7 +177,7 @@ class LocalStorageExporter:
             # This is a constant value, so we don't need to update it every time
             # However this is a simple way to ensure that the metric is always updated when there was a change instead of tracking creation/deletion events
             # If we can just extract this information from the used_bytes_gauge label using promql (or different method), we can remove this gauge.
-            self.pv_capacity_bytes_gauge.labels(
+            metrics.pv_capacity_bytes_gauge.labels(
                 node_name=self.node_name,
                 pvc_name=pvc_name,
                 pvc_namespace=pvc_namespace,
@@ -263,17 +190,17 @@ class LocalStorageExporter:
     def update_mount_storage_metrics(self):
         for host_path, volume_mount_path in self.host_path_to_volume_mount.items():
             capacity, used, available = self.get_mount_storage_info(volume_mount_path)
-            self.mounted_disk_capacity_gauge.labels(
+            metrics.mounted_disk_capacity_gauge.labels(
                 node_name=self.node_name,
                 host_path=host_path,
                 volume_mount_path=volume_mount_path,
             ).set(capacity)
-            self.mounted_disk_used_gauge.labels(
+            metrics.mounted_disk_used_gauge.labels(
                 node_name=self.node_name,
                 host_path=host_path,
                 volume_mount_path=volume_mount_path,
             ).set(used)
-            self.mounted_disk_available_gauge.labels(
+            metrics.mounted_disk_available_gauge.labels(
                 node_name=self.node_name,
                 host_path=host_path,
                 volume_mount_path=volume_mount_path,
@@ -282,69 +209,3 @@ class LocalStorageExporter:
     def update_metrics(self):
         self.update_pv_metrics()
         self.update_mount_storage_metrics()
-
-
-def convert_str_to_seconds(timestr: str) -> float:
-    units = {
-        "ms": 0.001,
-        "s": 1,
-        "m": 60,
-        "h": 3600,
-    }
-    number = 0
-    unit = ""
-
-    # Extract number and unit from string
-    for char in timestr:
-        if char.isdigit() and unit == "":
-            number = number * 10 + int(char)
-        else:
-            unit += char
-
-    if not unit:
-        # default to seconds if no unit is provided
-        return number
-    if unit not in units:
-        raise ValueError(f"Invalid time unit: {unit}")
-    return number * units[unit]
-
-
-def main():
-    try:
-        # PVs that we want to monitor should have storage class name that is in the list
-        # Expect comma separated list
-        storage_class_names = os.environ.get("STORAGE_CLASS_NAMES")
-        storage_class_names = (
-            storage_class_names.split(",") if storage_class_names else []
-        )
-        if storage_class_names == []:
-            _logger.error("No storage class names provided. Exiting...")
-            exit(1)
-
-        # Port to expose metrics
-        port = int(os.environ.get("METRICS_PORT", 9100))
-
-        # Update interval with ms, s, m, h suffixes, no suffix means seconds
-        update_interval = os.environ.get("UPDATE_INTERVAL")
-        if update_interval:
-            update_interval = convert_str_to_seconds(update_interval)
-        else:
-            update_interval = 30
-
-        _logger.info(f"Storageclass names: {storage_class_names}")
-        _logger.info(f"Metrics port: {port}")
-        _logger.info(f"Update interval: {update_interval} seconds")
-
-        lse = LocalStorageExporter(storage_class_names=storage_class_names)
-        start_http_server(port)  # Metrics exporter server
-        _logger.info(f"Started local storage exporter on port {port}")
-        while True:
-            lse.update_metrics()
-            time.sleep(update_interval)
-    except Exception as e:
-        _logger.error(f"Caught exception in main: {e}")
-        raise
-
-
-if __name__ == "__main__":
-    main()

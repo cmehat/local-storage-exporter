@@ -19,4 +19,4 @@ COPY . .
 # activate venv
 ENV PATH="/app/venv/bin:$PATH"
 
-CMD ["python", "local_storage_exporter.py"]
+CMD ["python", "-m", "local_storage_exporter"]
