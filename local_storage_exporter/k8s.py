@@ -110,7 +110,7 @@ class LocalStorageExporter:
             return None
 
         # Find the local path for the mounted volume
-        local_path: Path = None
+        local_path: Path | None = None
         for parent in pv_path.parents:
             if parent in self.host_path_to_volume_mount:
                 relative = pv_path.relative_to(parent)
@@ -140,7 +140,7 @@ class LocalStorageExporter:
             _logger.error(f"Failed to get volume usage for {local_path}: {e}")
             return None
 
-    def get_mount_storage_info(self, volume_mount_path: Path) -> tuple[int, int]:
+    def get_mount_storage_info(self, volume_mount_path: Path) -> tuple[int, int, int]:
         result = subprocess.run(
             ["df", "-B1", os.fspath(volume_mount_path)],
             capture_output=True,
