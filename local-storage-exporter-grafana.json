@@ -1,780 +1,773 @@
 {
-    "__inputs": [
+  "annotations": {
+    "list": [
       {
-        "name": "DS_PROMETHEUS",
-        "label": "Prometheus",
-        "description": "",
-        "type": "datasource",
-        "pluginId": "prometheus",
-        "pluginName": "Prometheus"
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
       }
-    ],
-    "__elements": {},
-    "__requires": [
-      {
-        "type": "panel",
-        "id": "gauge",
-        "name": "Gauge",
-        "version": ""
-      },
-      {
-        "type": "grafana",
-        "id": "grafana",
-        "name": "Grafana",
-        "version": "11.4.0"
-      },
-      {
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 50,
+  "links": [
+    {
+      "asDropdown": true,
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "kubernetes-mixin"
+      ],
+      "targetBlank": false,
+      "title": "Kubernetes",
+      "type": "dashboards"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": {
+        "default": false,
         "type": "datasource",
-        "id": "prometheus",
-        "name": "Prometheus",
-        "version": "1.0.0"
+        "uid": "-- Mixed --"
       },
-      {
-        "type": "panel",
-        "id": "table",
-        "name": "Table",
-        "version": ""
-      },
-      {
-        "type": "panel",
-        "id": "timeseries",
-        "name": "Time series",
-        "version": ""
-      }
-    ],
-    "annotations": {
-      "list": [
-        {
-          "builtIn": 1,
-          "datasource": {
-            "type": "grafana",
-            "uid": "-- Grafana --"
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
           },
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "type": "dashboard"
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 18,
+        "x": 0,
+        "y": 0
+      },
+      "id": 3,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "asTable": true,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
         }
-      ]
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "local_storage_mounted_disk_used_bytes{node_name=~\"$node\"}",
+          "legendFormat": "Used Space: {{node_name}}",
+          "range": true,
+          "refId": "Mounted Disk Used Space"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"}",
+          "legendFormat": "Capacity: {{node_name}}",
+          "range": true,
+          "refId": "Mounted Disk Capacity"
+        }
+      ],
+      "title": "Mounted Disk Space Usage",
+      "type": "timeseries"
     },
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": null,
-    "links": [
-      {
-        "asDropdown": true,
-        "includeVars": true,
-        "keepTime": true,
-        "tags": [
-          "kubernetes-mixin"
-        ],
-        "targetBlank": false,
-        "title": "Kubernetes",
-        "type": "dashboards"
-      }
-    ],
-    "panels": [
-      {
-        "datasource": {
-          "type": "datasource",
-          "uid": "-- Mixed --"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisBorderShow": false,
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "barWidthFactor": 0.6,
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
+    {
+      "datasource": {
+        "default": false,
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
-              "insertNulls": false,
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
+              {
+                "color": "orange",
+                "value": 80
               },
-              "showPoints": "never",
-              "spanNulls": true,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
+              {
+                "color": "red",
+                "value": 90
               }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "bytes"
+            ]
           },
-          "overrides": []
+          "unit": "percent"
         },
-        "gridPos": {
-          "h": 7,
-          "w": 18,
-          "x": 0,
-          "y": 0
-        },
-        "id": 3,
-        "interval": "1m",
-        "options": {
-          "legend": {
-            "asTable": true,
-            "calcs": [
-              "lastNotNull"
-            ],
-            "displayMode": "table",
-            "placement": "right",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "11.4.0",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "editorMode": "code",
-            "expr": "local_storage_mounted_disk_used_bytes{node_name=~\"$node\"}",
-            "legendFormat": "Used Space: {{node_name}}",
-            "range": true,
-            "refId": "Mounted Disk Used Space"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS}"
-            },
-            "editorMode": "code",
-            "expr": "local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"}",
-            "legendFormat": "Capacity: {{node_name}}",
-            "range": true,
-            "refId": "Mounted Disk Capacity"
-          }
-        ],
-        "title": "Mounted Disk Space Usage",
-        "type": "timeseries"
+        "overrides": []
       },
-      {
-        "datasource": {
-          "type": "datasource",
-          "uid": "-- Mixed --"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "max": 100,
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "orange",
-                  "value": 80
-                },
-                {
-                  "color": "red",
-                  "value": 90
-                }
-              ]
-            },
-            "unit": "percent"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 6,
-          "x": 18,
-          "y": 0
-        },
-        "id": 4,
-        "interval": "1m",
-        "options": {
-          "minVizHeight": 75,
-          "minVizWidth": 75,
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "showThresholdLabels": false,
-          "showThresholdMarkers": true,
-          "sizing": "auto"
-        },
-        "pluginVersion": "11.4.0",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "editorMode": "code",
-            "expr": "local_storage_mounted_disk_used_bytes{node_name=~\"$node\"} / local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"} * 100",
-            "instant": true,
-            "legendFormat": "{{node_name}}",
-            "refId": "A"
-          }
-        ],
-        "title": "Mounted Disk Space Usage",
-        "type": "gauge"
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 0
       },
-      {
-        "datasource": {
-          "type": "datasource",
-          "uid": "-- Mixed --"
+      "id": 4,
+      "interval": "1m",
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "local_storage_mounted_disk_used_bytes{node_name=~\"$node\"} / local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"} * 100",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "{{node_name}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Mounted Disk Space Usage",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             },
-            "custom": {
-              "axisBorderShow": false,
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "barWidthFactor": 0.6,
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
-              "insertNulls": false,
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "never",
-              "spanNulls": true,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
+              {
+                "color": "red",
+                "value": 80
               }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 18,
+        "x": 0,
+        "y": 7
+      },
+      "id": 1,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "asTable": true,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "local_storage_pv_used_bytes{pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"}",
+          "legendFormat": "{{pvc_name}}",
+          "range": true,
+          "refId": "PV Used Space"
+        }
+      ],
+      "title": "Volume Space Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 7
+      },
+      "id": 2,
+      "interval": "1m",
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(local_storage_pv_used_bytes /on(node_name) group_left() local_storage_mounted_disk_capacity_bytes * 100)",
+          "instant": true,
+          "legendFormat": "{{pvc_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "PV Space Usage",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
             },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #A (lastNotNull)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge"
                 }
-              ]
-            },
-            "unit": "bytes"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 18,
-          "x": 0,
-          "y": 7
-        },
-        "id": 1,
-        "interval": "1m",
-        "options": {
-          "legend": {
-            "asTable": true,
-            "calcs": [
-              "lastNotNull"
-            ],
-            "displayMode": "table",
-            "placement": "right",
-            "showLegend": true,
-            "sortBy": "Last *",
-            "sortDesc": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "11.4.0",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "editorMode": "code",
-            "expr": "local_storage_pv_used_bytes{pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"}",
-            "legendFormat": "PV Used Space: {{pvc_name}}",
-            "range": true,
-            "refId": "PV Used Space"
+              }
+            ]
           },
           {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS}"
+            "matcher": {
+              "id": "byName",
+              "options": "Used"
             },
-            "editorMode": "code",
-            "exemplar": false,
-            "expr": "local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"}",
-            "hide": true,
-            "legendFormat": "Mounted Disk Capacity: {{node_name}}",
-            "range": true,
-            "refId": "Mounted Disk Capacity"
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
           }
-        ],
-        "title": "Volume Space Usage",
-        "type": "timeseries"
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 18,
+        "x": 0,
+        "y": 14
+      },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "frameIndex": 1,
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Used"
+          }
+        ]
+      },
+      "pluginVersion": "11.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "local_storage_pv_used_bytes{node=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "local_storage_pv_used_bytes{node=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"} /on(node_name) group_left() local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"} * 100",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "B"
+        }
+      ],
+      "title": "Disk Space Usage",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Value": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value #A": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #B": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #C": {
+                "aggregations": [
+                  "lastNotNull"
+                ]
+              },
+              "node_name": {
+                "aggregations": []
+              },
+              "pvc_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "storage_path": {
+                "aggregations": []
+              }
+            }
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Value #A (lastNotNull)": "Used",
+              "Value #B (lastNotNull)": "Used %",
+              "Value #C": "",
+              "Value #C (lastNotNull)": "Total",
+              "pvc_name": "PVC Name"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "prometheus"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data source",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
       },
       {
-        "datasource": {
-          "type": "datasource",
-          "uid": "-- Mixed --"
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": [
+            "clean-archaeopteryx-node-01"
+          ],
+          "value": [
+            "clean-archaeopteryx-node-01"
+          ]
         },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "max": 100,
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "orange",
-                  "value": 80
-                },
-                {
-                  "color": "red",
-                  "value": 90
-                }
-              ]
-            },
-            "unit": "percent"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 6,
-          "x": 18,
-          "y": 7
-        },
-        "id": 2,
-        "interval": "1m",
-        "options": {
-          "minVizHeight": 75,
-          "minVizWidth": 75,
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "showThresholdLabels": false,
-          "showThresholdMarkers": true,
-          "sizing": "auto"
-        },
-        "pluginVersion": "11.4.0",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "editorMode": "code",
-            "expr": "sum(local_storage_pv_used_bytes /on(node_name) group_left() local_storage_mounted_disk_capacity_bytes * 100)",
-            "instant": true,
-            "legendFormat": "{{pvc_name}}",
-            "refId": "A"
-          }
-        ],
-        "title": "PV Space Usage",
-        "type": "gauge"
-      },
-      {
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "${datasource}"
         },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "custom": {
-              "align": "auto",
-              "cellOptions": {
-                "type": "auto"
-              },
-              "filterable": false,
-              "inspect": false
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "yellow",
-                  "value": 0.8
-                },
-                {
-                  "color": "red",
-                  "value": 0.9
-                }
-              ]
-            }
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Value #A (lastNotNull)"
-              },
-              "properties": [
-                {
-                  "id": "unit",
-                  "value": "bytes"
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Used %"
-              },
-              "properties": [
-                {
-                  "id": "unit",
-                  "value": "percent"
-                },
-                {
-                  "id": "custom.cellOptions",
-                  "value": {
-                    "type": "gauge"
-                  }
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Used"
-              },
-              "properties": [
-                {
-                  "id": "custom.width",
-                  "value": 100
-                }
-              ]
-            }
+        "definition": "label_values(local_storage_pv_capacity_bytes,node_name)",
+        "description": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Node",
+        "multi": true,
+        "name": "node",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(local_storage_pv_capacity_bytes,node_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\"},storage_class_name)",
+        "description": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Storage Class",
+        "multi": true,
+        "name": "storageClassName",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\"},storage_class_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\"},pvc_namespace)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Namespace",
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\"},pvc_namespace)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": [
+            "data-mayastor-etcd-1"
+          ],
+          "value": [
+            "data-mayastor-etcd-1"
           ]
         },
-        "gridPos": {
-          "h": 8,
-          "w": 18,
-          "x": 0,
-          "y": 14
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
-        "id": 5,
-        "options": {
-          "cellHeight": "sm",
-          "footer": {
-            "countRows": false,
-            "enablePagination": false,
-            "fields": "",
-            "reducer": [
-              "sum"
-            ],
-            "show": true
-          },
-          "frameIndex": 1,
-          "showHeader": true,
-          "sortBy": [
-            {
-              "desc": false,
-              "displayName": "Used"
-            }
-          ]
+        "definition": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\"},pvc_name)",
+        "description": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "PersistentVolumeClaim",
+        "multi": true,
+        "name": "pvc",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\"},pvc_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "pluginVersion": "11.4.0",
-        "targets": [
-          {
-            "editorMode": "code",
-            "exemplar": false,
-            "expr": "local_storage_pv_used_bytes{node=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"}",
-            "format": "table",
-            "hide": false,
-            "instant": true,
-            "interval": "",
-            "legendFormat": "__auto",
-            "range": false,
-            "refId": "A",
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS}"
-            }
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${DS_PROMETHEUS}"
-            },
-            "editorMode": "code",
-            "exemplar": false,
-            "expr": "local_storage_pv_used_bytes{node=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"} /on(node_name) group_left() local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"} * 100",
-            "format": "table",
-            "hide": false,
-            "instant": true,
-            "legendFormat": "__auto",
-            "range": false,
-            "refId": "B"
-          }
-        ],
-        "title": "Disk Space Usage",
-        "transformations": [
-          {
-            "id": "groupBy",
-            "options": {
-              "fields": {
-                "Value": {
-                  "aggregations": [],
-                  "operation": "groupby"
-                },
-                "Value #A": {
-                  "aggregations": [
-                    "lastNotNull"
-                  ],
-                  "operation": "aggregate"
-                },
-                "Value #B": {
-                  "aggregations": [
-                    "lastNotNull"
-                  ],
-                  "operation": "aggregate"
-                },
-                "Value #C": {
-                  "aggregations": [
-                    "lastNotNull"
-                  ]
-                },
-                "node_name": {
-                  "aggregations": []
-                },
-                "pvc_name": {
-                  "aggregations": [],
-                  "operation": "groupby"
-                },
-                "storage_path": {
-                  "aggregations": []
-                }
-              }
-            }
-          },
-          {
-            "id": "merge",
-            "options": {}
-          },
-          {
-            "id": "organize",
-            "options": {
-              "excludeByName": {},
-              "includeByName": {},
-              "indexByName": {},
-              "renameByName": {
-                "Value #A (lastNotNull)": "Used",
-                "Value #B (lastNotNull)": "Used %",
-                "Value #C": "",
-                "Value #C (lastNotNull)": "Total",
-                "pvc_name": "PVC Name"
-              }
-            }
-          }
-        ],
-        "type": "table"
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       }
-    ],
-    "refresh": "10s",
-    "schemaVersion": 40,
-    "tags": [],
-    "templating": {
-      "list": [
-        {
-          "current": {},
-          "label": "Data source",
-          "name": "datasource",
-          "options": [],
-          "query": "prometheus",
-          "refresh": 1,
-          "regex": "",
-          "type": "datasource"
-        },
-        {
-          "allValue": ".*",
-          "current": {},
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "definition": "label_values(local_storage_pv_capacity_bytes,node_name)",
-          "description": "",
-          "includeAll": true,
-          "label": "Node",
-          "multi": true,
-          "name": "node",
-          "options": [],
-          "query": {
-            "qryType": 1,
-            "query": "label_values(local_storage_pv_capacity_bytes,node_name)",
-            "refId": "PrometheusVariableQueryEditor-VariableQuery"
-          },
-          "refresh": 2,
-          "sort": 1,
-          "type": "query"
-        },
-        {
-          "allValue": ".*",
-          "current": {},
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "definition": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\"},storage_class_name)",
-          "description": "",
-          "includeAll": true,
-          "label": "Storage Class",
-          "multi": true,
-          "name": "storageClassName",
-          "options": [],
-          "query": {
-            "qryType": 1,
-            "query": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\"},storage_class_name)",
-            "refId": "PrometheusVariableQueryEditor-VariableQuery"
-          },
-          "refresh": 1,
-          "regex": "",
-          "type": "query"
-        },
-        {
-          "allValue": ".*",
-          "current": {},
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "definition": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\"},pvc_namespace)",
-          "includeAll": true,
-          "label": "Namespace",
-          "multi": true,
-          "name": "namespace",
-          "options": [],
-          "query": {
-            "qryType": 1,
-            "query": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\"},pvc_namespace)",
-            "refId": "PrometheusVariableQueryEditor-VariableQuery"
-          },
-          "refresh": 2,
-          "sort": 1,
-          "type": "query"
-        },
-        {
-          "allValue": ".*",
-          "current": {},
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "definition": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\"},pvc_name)",
-          "description": "",
-          "includeAll": true,
-          "label": "PersistentVolumeClaim",
-          "multi": true,
-          "name": "pvc",
-          "options": [],
-          "query": {
-            "qryType": 1,
-            "query": "label_values(local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\"},pvc_name)",
-            "refId": "PrometheusVariableQueryEditor-VariableQuery"
-          },
-          "refresh": 2,
-          "regex": "",
-          "sort": 1,
-          "type": "query"
-        }
-      ]
-    },
-    "time": {
-      "from": "now-1h",
-      "to": "now"
-    },
-    "timepicker": {},
-    "timezone": "browser",
-    "title": "Local Storage Exporter",
-    "uid": "de7eak1lamebka",
-    "version": 37,
-    "weekStart": ""
-  }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Local Storage Exporter",
+  "uid": "de7eak1lamebka",
+  "version": 3,
+  "weekStart": ""
+}
