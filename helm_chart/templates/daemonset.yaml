@@ -1,13 +1,12 @@
 {{ include "validate.requiredValues" . }}
 {{ $metricsPort := include "validate.metricsPort" . }}
 ---
-{{ if .Values.deployment.enable -}}
+{{ if .Values.daemonSet.enable -}}
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
-  name: {{ .Release.Name }}-local-storage-exporter-deployment
+  name: {{ .Release.Name }}-local-storage-exporter-daemonset
 spec:
-  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}-local-storage-exporter
@@ -15,7 +14,7 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}-local-storage-exporter
-    spec:
+    spec:        
       serviceAccountName: {{ .Release.Name }}-local-storage-exporter-serviceaccount
       {{ if .Values.imagePullSecrets -}}
       imagePullSecrets:
@@ -28,7 +27,7 @@ spec:
           {{ if .Values.image.registry -}}
           image: {{ .Values.image.registry }}/local-storage-exporter:{{ .Values.image.tag }}
           {{ else -}}
-          image: local-storage-exporter:{{ .Values.image.tag }}
+          image: local-storage-exporter:{{ .Values.tag }}
           {{ end -}}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           volumeMounts:
@@ -42,25 +41,13 @@ spec:
               name: metrics
           env:
             - name: STORAGE_CLASS_NAMES
-              value: {{ join "," .Values.storageClassNames }}
+              value: {{join "," .Values.storageClassNames }}
             - name: METRICS_PORT
               value: {{ quote $metricsPort }}
             - name: UPDATE_INTERVAL
               value: {{ quote .Values.updateInterval }}
             - name: LOGLEVEL
               value: {{ .Values.logLevel | upper | quote }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: {{ $metricsPort }}
-            initialDelaySeconds: 3
-            periodSeconds: 15
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ $metricsPort }}
-            initialDelaySeconds: 3
-            periodSeconds: 15
       volumes:
       {{ range .Values.storagePaths -}}
       - name: "node-data-{{ include "urlsafeB64enc" . | lower }}"

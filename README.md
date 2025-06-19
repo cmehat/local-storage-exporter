@@ -1,46 +1,90 @@
 # K8s Local Storage Metrics Exporter
-This repository contains the code, Dockerfile, Helm chart and a Grafana dashboard for a local storage metrics exporter for k8s storage providers that are using host path, such as openebs-hostpath, microk8s-hostpath, standard storage class for minikube, kind and k3s.
 
-## Repository Organization
+A Prometheus metrics exporter for Kubernetes storage providers that use host path storage, including openebs-hostpath, microk8s-hostpath, and standard storage classes for minikube, kind, and k3s. 
+This exporter fills the gap left by standard Kubernetes monitoring solutions that don't provide visibility into local storage usage on worker nodes.
 
-The local storage metrics exporter is written in python and the code is (currently) in one python file `local_storage_exporter.py`.
-It is designed to be deployed as a kubernetes pod, therefore running it as is will not work.
-To run it, first you need to build it as a container image. Below is the steps to build and push it to gcp docker registry:
+## Features
+
+- Exports local storage metrics in Prometheus format
+- Supports multiple storage class providers
+- Configurable update intervals
+- Kubernetes-native deployment via Helm
+- ServiceMonitor/PodMonitor for Prometheus Operator integration
+- Grafana dashboard included
+
+## Quick Start
+
+### Prerequisites
+
+- Kubernetes cluster
+- Docker/container registry access
+- Helm 3.x
+
+### Build and Push Container Image
+
 ```bash
-# Example env values
-# REGISTRY=europe-west3-docker.pkg.dev
-# PROJECT=my-project
-# PLATFORM=amd64
-docker build -t $REGISTRY/$PROJECT/prokube/local-storage-exporter:$PLATFORM --platform=linux/$PLATFORM .
-docker push $REGISTRY/$PROJECT/prokube/local-storage-exporter:$PLATFORM
+REGISTRY=my-registry
+# first docker login if needed
+docker build -t ${REGISTRY}/local-storage-exporter:latest --platform=linux/amd64 . # change the platform and tag according to your needs
+docker push ${REGISTRY}/local-storage-exporter:latest
 ```
 
-After building the image and push it to your registry, you can deploy it using the provided helm chart after providing a values file.
-You can check `local-storage-exporter-helm/values.yaml` to see the values you can use for the helm chart.
-Example values.yaml:
-```yaml
-# values.yaml
-# serviceMonitor requires monitoring.coreos.com/v1 api, which can be installed through prometheus-operator
-serviceMonitor:
-  enabled: true
+### Deploy with Helm
 
+Create a `values.yaml` file:
+```yaml
+serviceMonitor:
+  enabled: true  # Requires prometheus-operator
+
+# Values about the built and pushed local-storage-exporter image
 image:
-  tag: amd64
-  imagePullPolicy: Always
-  registry: <registry>
+  registry: your-registry-here
+  tag: "0.1.0"
+  imagePullPolicy: IfNotPresent
 
 imagePullSecrets:
-  - name: <registry credentials> # Don't forget to create the secret!
+  - name: your-registry-secret
 
 updateInterval: 15s
 
-storageClassNames: [openebs-hostpath]
-storagePath: /var/openebs/local/
+storageClassNames: 
+  - openebs-hostpath
+
+storagePaths: 
+  - /var/openebs/local/
 ```
 
+Install the Helm chart:
 ```bash
-helm install -n <namespace> <release name> ./local-storage-exporter-helm --create-namespace --values=values.yaml
+# --create-namespace if namespace does not exist
+helm install -n <namespace> <release-name> ./helm_chart \
+  --create-namespace \
+  --values=values.yaml
 ```
 
-After deploying the helm release, you can check if the exporter is working by port-forwarding to the created service and using a http client to check the endpoint. 
-If you enabled serviceMonitor and have a prometheus instance running (such as after deploying the helm chart `kube-prometheus-stack`), you should see the metrics show at your prometheus instance.
+### Verify Installation
+
+Port-forward to test the metrics endpoint:
+```bash
+kubectl port-forward -n <namespace> svc/<release-name>-local-storage-exporter-service 9100:9100
+curl http://localhost:9100/metrics
+```
+
+If ServiceMonitor is enabled and Prometheus Operator is running, metrics will automatically be scraped by Prometheus.
+
+## Tested Storage Providers
+
+| Storage Provider | StorageClass      | Path on Node                              |
+| ---------------- | ----------------- | ----------------------------------------- |
+| openebs          | openebs-hostpath  | /var/openebs/local                        |
+| microk8s         | microk8s-hostpath | /var/snap/microk8s/common/default-storage |
+| kind             | standard          | /var/local-path-provisioner               |
+| minikube         | standard          | /tmp/hostpath-provisioner                 |
+| k3s              | standard          | /var/lib/rancher/k3s/storage/             |
+
+
+## Grafana Dashboard
+
+A grafana dashboard is included as [local-storage-expoerter-grafana.json](/local-storage-exporter-grafana.json). You can import it into your Grafana instance to visualize the metrics collected by the exporter. 
+
+<img src="/assets/grafana-dashboard.png" alt="Grafana Dashboard" width="800"/>

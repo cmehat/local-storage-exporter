@@ -10,16 +10,8 @@ from local_storage_exporter import utils
 
 def main():
     # Set up logging and create handler for info logs
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-    handler.setFormatter(formatter)
-    _logger = logging.getLogger(__name__)
-    _logger.setLevel(logging.INFO)
-    _logger.addHandler(handler)
-
+    _logger = utils.createLogger(__name__)
+    _logger.info("Starting local storage exporter...")
     try:
         # PVs that we want to monitor should have storage class name that is in the list
         # Expect comma separated list

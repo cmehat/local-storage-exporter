@@ -3,8 +3,11 @@
 {{- if empty .Values.storageClassNames -}}
 {{ fail "Please provide an array of storageclass names" }}
 {{- end -}}
-{{ $storageClassNames := .Values.storageClassNames | required ".Values.storageClassNames is required" }}
-{{ $storagePath := .Values.storagePath | required ".Values.storagePath is required" }}
+{{- if empty .Values.storagePaths -}}
+{{ fail "Please provide an array of storage paths" }}
+{{- end -}}
+{{- $storageClassNames := .Values.storageClassNames | default (list) -}}
+{{- $storagePaths := .Values.storagePaths | default (list) -}}
 {{- end -}}
 
 {{/* Convert metricsPort to an integer and validate its value. */}}
@@ -15,3 +18,10 @@
 {{ end }}
 {{- $metricsPort -}}
 {{ end }}
+
+{{- define "urlsafeB64enc" -}}
+{{- $encoded := . | toString | b64enc -}}
+{{- $urlsafe := $encoded | replace "+" "-" | replace "/" "_" -}}
+{{- $noPadding := $urlsafe | trimSuffix "=" | trimSuffix "=" -}}
+{{- $noPadding -}}
+{{- end }}

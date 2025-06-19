@@ -1,5 +1,5 @@
 storageClassNames: []
-storagePath:
+storagePaths: []
 
 metricsPort: 9100
 serviceEnabled: true
@@ -19,6 +19,13 @@ image:
   imagePullPolicy: IfNotPresent
   registry: 
 
+logLevel: info
+
 imagePullSecrets: []
 
-replicaCount: 1
+daemonSet:
+  enable: true
+
+deployment:
+  enable: false
+  replicas: 1

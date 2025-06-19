@@ -1,4 +1,6 @@
 import re
+import logging
+import os
 
 
 def convert_storage_capacity_to_bytes(storage_capacity: str) -> int:
@@ -42,3 +44,24 @@ def convert_str_to_seconds(timestr: str) -> float:
     if unit not in units:
         raise ValueError(f"Invalid time unit: {unit}")
     return number * units[unit]
+
+def createLogger(name: str) -> logging.Logger:
+    """
+    Create a logger with the specified name and set its level to LOGLEVEL env or INFO.
+    """
+    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
+    loglevel = logging.getLevelNamesMapping().get(LOGLEVEL, logging.INFO)
+    handler = logging.StreamHandler()
+    handler.setLevel(loglevel)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(loglevel)
+    logger.addHandler(handler)
+    if LOGLEVEL not in logging.getLevelNamesMapping():
+        # This check is redundant but ensures that we log a warning if the LOGLEVEL is invalid and we need to create the logger first.
+        logger.warning(f"Invalid log level: {LOGLEVEL}. Must be one of {list(logging.getLevelNamesMapping().keys())}, defaulting to INFO.")
+
+    return logger
