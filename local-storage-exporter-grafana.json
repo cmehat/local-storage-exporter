@@ -143,7 +143,7 @@
           "refId": "Mounted Disk Capacity"
         }
       ],
-      "title": "Mounted Disk Storage Usage",
+      "title": "Mounted Disk Overall Usage",
       "type": "timeseries"
     },
     {
@@ -221,7 +221,7 @@
           "refId": "A"
         }
       ],
-      "title": "Mounted Disk Storage Usage",
+      "title": "Mounted Disk Overall Usage",
       "type": "gauge"
     },
     {
@@ -302,9 +302,7 @@
           ],
           "displayMode": "table",
           "placement": "right",
-          "showLegend": true,
-          "sortBy": "Name",
-          "sortDesc": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "single",
@@ -330,6 +328,7 @@
     },
     {
       "datasource": {
+        "default": false,
         "type": "datasource",
         "uid": "-- Mixed --"
       },
@@ -399,11 +398,12 @@
           "refId": "A"
         }
       ],
-      "title": "PV Storage Usage",
+      "title": "PVs Consumption on Mounted Storage",
       "type": "gauge"
     },
     {
       "datasource": {
+        "default": true,
         "type": "prometheus",
         "uid": "prometheus"
       },
@@ -430,11 +430,11 @@
               },
               {
                 "color": "yellow",
-                "value": 80
+                "value": 50
               },
               {
                 "color": "red",
-                "value": 90
+                "value": 80
               }
             ]
           }
@@ -443,19 +443,23 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Value #A (lastNotNull)"
+              "options": "Used"
             },
             "properties": [
               {
                 "id": "unit",
                 "value": "bytes"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Used %"
+              "options": "Node Disk Consumption %"
             },
             "properties": [
               {
@@ -465,28 +469,52 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
+                  "mode": "gradient",
                   "type": "gauge"
                 }
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Used"
+              "options": "PV Capacity Usage %"
             },
             "properties": [
               {
-                "id": "custom.width",
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
                 "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 18,
+        "h": 10,
+        "w": 24,
         "x": 0,
         "y": 14
       },
@@ -504,12 +532,7 @@
         },
         "frameIndex": 1,
         "showHeader": true,
-        "sortBy": [
-          {
-            "desc": false,
-            "displayName": "Used"
-          }
-        ]
+        "sortBy": []
       },
       "pluginVersion": "11.2.1",
       "targets": [
@@ -520,14 +543,14 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "local_storage_pv_used_bytes{node=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"}",
+          "expr": "local_storage_pv_used_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"}",
           "format": "table",
           "hide": false,
           "instant": true,
           "interval": "",
           "legendFormat": "__auto",
           "range": false,
-          "refId": "A"
+          "refId": "Used"
         },
         {
           "datasource": {
@@ -536,13 +559,29 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "local_storage_pv_used_bytes{node=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"} /on(node_name) group_left() local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"} * 100",
+          "expr": "local_storage_pv_used_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"} /on(node_name) group_left() local_storage_mounted_disk_capacity_bytes{node_name=~\"$node\"} * 100",
           "format": "table",
           "hide": false,
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
-          "refId": "B"
+          "refId": "UsedNodeDisk"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "local_storage_pv_used_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"} / local_storage_pv_capacity_bytes{node_name=~\"$node\", storage_class_name=~\"$storageClassName\", pvc_namespace=~\"$namespace\", pvc_name=~\"$pvc\"} * 100",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "UsedPVCapacity"
         }
       ],
       "title": "Persistent Volume Storage Usage",
@@ -572,6 +611,27 @@
                   "lastNotNull"
                 ]
               },
+              "Value #Used": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #UsedCapacity": {
+                "aggregations": []
+              },
+              "Value #UsedNodeDisk": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #UsedPVCapacity": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
               "node_name": {
                 "aggregations": []
               },
@@ -592,14 +652,26 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "excludeByName": {
+              "Value #Used (lastNotNull)": false,
+              "Value #UsedNodeDisk (lastNotNull)": false,
+              "pvc_name": false
+            },
             "includeByName": {},
-            "indexByName": {},
+            "indexByName": {
+              "Value #Used (lastNotNull)": 1,
+              "Value #UsedNodeDisk (lastNotNull)": 3,
+              "Value #UsedPVCapacity (lastNotNull)": 2,
+              "pvc_name": 0
+            },
             "renameByName": {
               "Value #A (lastNotNull)": "Used",
-              "Value #B (lastNotNull)": "Used %",
+              "Value #B (lastNotNull)": "Node Disk Usage %",
               "Value #C": "",
               "Value #C (lastNotNull)": "Total",
+              "Value #Used (lastNotNull)": "Used",
+              "Value #UsedNodeDisk (lastNotNull)": "Node Disk Consumption %",
+              "Value #UsedPVCapacity (lastNotNull)": "PV Capacity Usage %",
               "pvc_name": "PVC Name"
             }
           }
@@ -768,6 +840,6 @@
   "timezone": "browser",
   "title": "Local Storage Exporter",
   "uid": "de7eak1lamebka",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
