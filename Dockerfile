@@ -1,39 +1,19 @@
-# Modified from uv-docker-example (https://github.com/astral-sh/uv-docker-example)
-
-# First, build the application in the `/app` directory
-FROM ghcr.io/astral-sh/uv:bookworm-slim@sha256:2597ffa44de9d160ca9ee2e1073728e6492af57b9abba5d909d6272d6e67df1f AS builder
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
-
-# Configure the Python directory so it is consistent
-ENV UV_PYTHON_INSTALL_DIR=/python
-
-# Only use the managed Python version
-ENV UV_PYTHON_PREFERENCE=only-managed
-
-# Install Python before the project for caching
-RUN uv python install 3.13
-
-WORKDIR /app
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev
+FROM ghcr.io/astral-sh/uv:0.7.19-python3.13-bookworm-slim@sha256:7de393cd47b85a539e91d112f781b573c77ac7aa9fb01d8a76e6c92fef9b7b76 AS builder
 
 COPY . /app
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev
+WORKDIR /app
 
-# Then, use a final image without uv
-FROM debian:bookworm-slim@sha256:364d3f277f79b11fafee2f44e8198054486583d3392e2472eb656d5c780156f5
+# Install Python in builder stage and copy to final image to maintain consistent Debian base
+ENV UV_PYTHON_INSTALL_DIR=/python
+RUN uv python install 3.13
+RUN uv sync --locked --no-dev # It will create a virtual environment in /app/.venv
 
-# Copy the Python version
-COPY --from=builder --chown=python:python /python /python
+FROM debian:bookworm-slim@sha256:6ac2c08566499cc2415926653cf2ed7c3aedac445675a013cc09469c9e118fdd
 
-# Copy the application from the builder
-COPY --from=builder --chown=app:app /app /app
+COPY --from=builder /python /python
+COPY --from=builder /app /app
+WORKDIR /app
 
-# Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
-WORKDIR /app
 CMD ["python", "-m", "local_storage_exporter"]
