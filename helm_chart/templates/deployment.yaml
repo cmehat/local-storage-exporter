@@ -75,7 +75,7 @@ spec:
               protocol: TCP
           env:
             - name: STORAGE_CLASS_NAMES
-              value: {{ join "," .Values.storageClassNames }}
+              value: {{ join "," .Values.storageClassNames | quote }}
             - name: METRICS_PORT
               value: {{ quote $metricsPort }}
             - name: UPDATE_INTERVAL
@@ -98,7 +98,7 @@ spec:
         {{- range .Values.storagePaths }}
         - name: "node-data-{{ include "urlsafeB64enc" . | lower }}"
           hostPath:
-            path: {{ . }}
+            path: {{ . | quote }}
             type: Directory
         {{- end }}
 {{- end }}

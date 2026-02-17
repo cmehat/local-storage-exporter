@@ -71,6 +71,16 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
+{{/* Validate that exactly one of daemonSet or deployment is enabled. */}}
+{{- define "validate.workloadMode" -}}
+{{- if and .Values.daemonSet.enabled .Values.deployment.enabled -}}
+{{ fail "Only one of daemonSet.enabled or deployment.enabled can be true, not both" }}
+{{- end -}}
+{{- if and (not .Values.daemonSet.enabled) (not .Values.deployment.enabled) -}}
+{{ fail "At least one of daemonSet.enabled or deployment.enabled must be true" }}
+{{- end -}}
+{{- end -}}
+
 {{/* Convert metricsPort to an integer and validate its value. */}}
 {{- define "validate.metricsPort" -}}
 {{- $metricsPort := .Values.metricsPort | int -}}

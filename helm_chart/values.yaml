@@ -47,6 +47,11 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# -- RBAC configuration
+rbac:
+  # -- Specifies whether ClusterRole and ClusterRoleBinding should be created
+  create: true
+
 # -- Annotations to add to pods
 podAnnotations: {}
 # -- Labels to add to pods
@@ -97,6 +102,9 @@ podMonitor:
   interval: 30s
   # -- Scrape timeout
   scrapeTimeout: 10s
+  # -- Additional labels to add to the PodMonitor
+  # Useful for targeting by Prometheus Operator (e.g., release: kube-prometheus-stack)
+  labels: {}
 
 # -- DaemonSet deployment mode
 # Recommended for monitoring local storage on all nodes
