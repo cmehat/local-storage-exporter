@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "local-storage-exporter.fullname" . }}-test-connection"
+  labels:
+    {{- include "local-storage-exporter.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "local-storage-exporter.fullname" . }}:{{ include "validate.metricsPort" . }}']
+  restartPolicy: Never

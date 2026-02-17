@@ -8,17 +8,69 @@ storagePaths: []
 # -- Port on which the metrics server will listen
 metricsPort: 9100
 
-# -- Enable the Kubernetes Service for the exporter
-serviceEnabled: true
-
 # -- How often to refresh storage metrics
 updateInterval: 30s
+
+# -- Container image configuration
+image:
+  # -- Full image name as repository/name
+  repository: ghcr.io/prokube/local-storage-exporter
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: ""
+
+# -- List of image pull secrets for private registries
+imagePullSecrets: []
+# -- Override the chart name
+nameOverride: ""
+# -- Override the full name
+fullnameOverride: ""
+
+# -- Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# -- Annotations to add to pods
+podAnnotations: {}
+# -- Labels to add to pods
+podLabels: {}
+
+# -- Pod-level security context
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Container-level security context
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# -- Service configuration
+service:
+  # -- Enable the Kubernetes Service for the exporter
+  enabled: true
+  # -- Service type
+  type: ClusterIP
+
+# -- Log level for the exporter (debug, info, warning, error)
+logLevel: info
 
 # -- Prometheus Operator ServiceMonitor configuration
 # Requires prometheus-operator to be installed in the cluster
 serviceMonitor:
   enabled: false
-  interval: 30s # Scrape interval for the ServiceMonitor
+  interval: 30s
   scrapeTimeout: 10s
   # -- Additional labels to add to the ServiceMonitor
   # Useful for targeting by Prometheus Operator (e.g., release: kube-prometheus-stack)
@@ -28,28 +80,13 @@ serviceMonitor:
 # Alternative to ServiceMonitor, monitors pods directly
 podMonitor:
   enabled: false
-  # -- Scrape interval for the PodMonitor
   interval: 30s
   scrapeTimeout: 10s
-
-# -- Container image configuration
-image:
-  # -- Full image name as repository/name
-  repository: ghcr.io/prokube/local-storage-exporter
-  tag: latest
-  pullPolicy: IfNotPresent # Always, IfNotPresent, Never
-
-# -- Log level for the exporter (debug, info, warning, error)
-logLevel: info
-
-# -- List of image pull secrets for private registries
-# Example: [{ name: "my-registry-secret" }]
-imagePullSecrets: []
 
 # -- DaemonSet deployment mode
 # Recommended for monitoring local storage on all nodes
 daemonSet:
-  enable: true
+  enabled: true
   nodeSelector: {}
   tolerations: []
 
@@ -57,7 +94,7 @@ daemonSet:
 # Use when you only need to monitor from a single replica
 deployment:
   # -- Deploy as a Deployment instead of DaemonSet
-  enable: false
+  enabled: false
   # -- Number of replicas (only used if deployment is enabled)
   replicas: 1
   nodeSelector: {}
@@ -68,3 +105,28 @@ deployment:
 # Uses node anti-affinity with requiredDuringSchedulingIgnoredDuringExecution
 # Example: ["node1", "node2"]
 excludeNodes: []
+
+# -- Container resource requests and limits
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- Liveness probe configuration
+livenessProbe:
+  httpGet:
+    path: /
+    port: metrics
+  initialDelaySeconds: 3
+  periodSeconds: 15
+
+# -- Readiness probe configuration
+readinessProbe:
+  httpGet:
+    path: /
+    port: metrics
+  initialDelaySeconds: 3
+  periodSeconds: 15
