@@ -1,4 +1,5 @@
 {{- include "validate.requiredValues" . }}
+{{- include "validate.workloadMode" . }}
 {{- $metricsPort := include "validate.metricsPort" . }}
 {{- if .Values.deployment.enabled }}
 apiVersion: apps/v1

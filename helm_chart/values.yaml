@@ -82,6 +82,7 @@ logLevel: info
 
 # -- Prometheus Operator ServiceMonitor configuration
 # Requires prometheus-operator to be installed in the cluster
+# NOTE: ServiceMonitor requires service.enabled to be true
 serviceMonitor:
   # -- Enable the ServiceMonitor resource
   enabled: false

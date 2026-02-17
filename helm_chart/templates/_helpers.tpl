@@ -90,6 +90,13 @@ Create the name of the service account to use
 {{- $metricsPort -}}
 {{- end -}}
 
+{{/* Validate that ServiceMonitor/PodMonitor dependencies are met. */}}
+{{- define "validate.monitorDependencies" -}}
+{{- if and .Values.serviceMonitor.enabled (not .Values.service.enabled) -}}
+{{ fail "serviceMonitor.enabled requires service.enabled to be true. ServiceMonitor needs a Service resource to scrape from." }}
+{{- end -}}
+{{- end -}}
+
 {{- define "urlsafeB64enc" -}}
 {{- $encoded := . | toString | b64enc -}}
 {{- $urlsafe := $encoded | replace "+" "-" | replace "/" "_" -}}
