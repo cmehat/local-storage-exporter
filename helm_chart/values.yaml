@@ -1,29 +1,38 @@
-# -- List of storage class names to monitor (e.g., openebs-hostpath, microk8s-hostpath, standard)
+# -- (Required) List of storage class names to monitor
+# The chart will fail to render if this is empty.
+# Example: ["openebs-hostpath", "microk8s-hostpath", "standard"]
 storageClassNames: []
 
-# -- List of host paths where the storage provisioner stores PV data
-# Examples: /var/openebs/local/, /var/snap/microk8s/common/default-storage
+# -- (Required) List of host paths where the storage provisioner stores PV data
+# The chart will fail to render if this is empty.
+# Example: ["/var/openebs/local/", "/var/snap/microk8s/common/default-storage"]
 storagePaths: []
 
-# -- Port on which the metrics server will listen
+# -- Port on which the metrics server will listen (1-65535)
 metricsPort: 9100
 
 # -- How often to refresh storage metrics
+# Supported suffixes: ms, s, m, h. No suffix defaults to seconds.
+# Examples: 30s, 1m, 500ms, 2h, 30
 updateInterval: 30s
 
 # -- Container image configuration
 image:
-  # -- Full image name as repository/name
+  # -- Image repository
   repository: ghcr.io/prokube/local-storage-exporter
+  # -- Image pull policy (Always, IfNotPresent, Never)
   pullPolicy: IfNotPresent
   # -- Overrides the image tag whose default is the chart appVersion
   tag: ""
 
 # -- List of image pull secrets for private registries
+# Example:
+#   - name: my-registry-secret
 imagePullSecrets: []
-# -- Override the chart name
+
+# -- Override the chart name used in resource names and labels
 nameOverride: ""
-# -- Override the full name
+# -- Override the full resource name (release-name + chart-name) for all resources
 fullnameOverride: ""
 
 # -- Service account configuration
@@ -60,7 +69,7 @@ securityContext: {}
 service:
   # -- Enable the Kubernetes Service for the exporter
   enabled: true
-  # -- Service type
+  # -- Service type (ClusterIP, NodePort, LoadBalancer)
   type: ClusterIP
 
 # -- Log level for the exporter (debug, info, warning, error)
@@ -69,8 +78,11 @@ logLevel: info
 # -- Prometheus Operator ServiceMonitor configuration
 # Requires prometheus-operator to be installed in the cluster
 serviceMonitor:
+  # -- Enable the ServiceMonitor resource
   enabled: false
+  # -- Scrape interval
   interval: 30s
+  # -- Scrape timeout
   scrapeTimeout: 10s
   # -- Additional labels to add to the ServiceMonitor
   # Useful for targeting by Prometheus Operator (e.g., release: kube-prometheus-stack)
@@ -79,15 +91,21 @@ serviceMonitor:
 # -- Prometheus Operator PodMonitor configuration
 # Alternative to ServiceMonitor, monitors pods directly
 podMonitor:
+  # -- Enable the PodMonitor resource
   enabled: false
+  # -- Scrape interval
   interval: 30s
+  # -- Scrape timeout
   scrapeTimeout: 10s
 
 # -- DaemonSet deployment mode
 # Recommended for monitoring local storage on all nodes
 daemonSet:
+  # -- Deploy as a DaemonSet
   enabled: true
+  # -- Node selector for DaemonSet pods
   nodeSelector: {}
+  # -- Tolerations for DaemonSet pods
   tolerations: []
 
 # -- Deployment mode (alternative to DaemonSet)
@@ -97,14 +115,37 @@ deployment:
   enabled: false
   # -- Number of replicas (only used if deployment is enabled)
   replicas: 1
+  # -- Node selector for Deployment pods
   nodeSelector: {}
+  # -- Tolerations for Deployment pods
   tolerations: []
 
-# -- List of node names to exclude from scheduling (applies to both DaemonSet and Deployment)
-# Pods will not be scheduled on nodes matching these names
-# Uses node anti-affinity with requiredDuringSchedulingIgnoredDuringExecution
+# -- Convenience shortcut to exclude specific nodes by hostname
+# Pods will not be scheduled on nodes matching these names.
+# Uses nodeAffinity with requiredDuringSchedulingIgnoredDuringExecution.
+# Takes precedence over the affinity value below — if you need both excludeNodes
+# and custom affinity rules, express everything in the affinity value instead.
 # Example: ["node1", "node2"]
 excludeNodes: []
+
+# -- Custom affinity rules (advanced)
+# Only used when excludeNodes is empty; excludeNodes takes precedence when set.
+# To combine node exclusion with other affinity rules, express everything here:
+# Example (excludeNodes + zone affinity combined):
+#   nodeAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#         - matchExpressions:
+#             - key: kubernetes.io/hostname
+#               operator: NotIn
+#               values:
+#                 - node1
+#                 - node2
+#             - key: topology.kubernetes.io/zone
+#               operator: In
+#               values:
+#                 - us-east-1a
+affinity: {}
 
 # -- Container resource requests and limits
 resources: {}
