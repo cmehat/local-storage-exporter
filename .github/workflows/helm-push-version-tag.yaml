@@ -1,4 +1,4 @@
-name: Helm package main and push to ghcr.io
+name: Helm package version tag and push to ghcr.io
 
 on:
   push:
