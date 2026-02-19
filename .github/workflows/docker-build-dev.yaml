@@ -21,6 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -28,22 +31,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build the Docker image
-        run: |
-          set -euo pipefail
-          
-          # Create a safe branch name suffix for the dev version
-          SAFE_REF_NAME=$(echo '${{ github.ref_name }}' | sed 's/[^a-zA-Z0-9._-]/-/g' | tr '[:upper:]' '[:lower:]')
-          
-          # Define the image name and tag
-          IMAGE_NAME="ghcr.io/prokube/dev/local-storage-exporter"
-          IMAGE_TAG="dev-$SAFE_REF_NAME"
-          COMMIT_TAG="dev-commit-${{ github.sha }}"
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/prokube/dev/local-storage-exporter
+          tags: |
+            type=raw,value=dev-{{branch}}
+            type=raw,value=dev-commit-{{sha}}
 
-          echo "Building Docker image: $IMAGE_NAME:$IMAGE_TAG"
-          docker build . -f Dockerfile -t $IMAGE_NAME:$IMAGE_TAG
-          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:$COMMIT_TAG
-
-          echo "Pushing built image"
-          docker push $IMAGE_NAME:$IMAGE_TAG
-          docker push $IMAGE_NAME:$COMMIT_TAG
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
