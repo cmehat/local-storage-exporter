@@ -17,6 +17,9 @@ spec:
     - port: metrics
       interval: {{ .Values.podMonitor.interval }}
       scrapeTimeout: {{ .Values.podMonitor.scrapeTimeout }}
+      metricRelabelings:
+        - action: labeldrop
+          regex: instance|pod
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
