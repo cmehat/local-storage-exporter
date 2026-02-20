@@ -35,7 +35,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/prokube/dev/local-storage-exporter
+          images: ghcr.io/cmehat/local-storage-exporter
           tags: |
             type=raw,value=dev-{{branch}},enable=true
             type=raw,value=dev-commit-${{ github.sha }}

@@ -55,7 +55,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/prokube/local-storage-exporter
+          images: ghcr.io/cmehat/local-storage-exporter
           flavor: |
             latest=false
           tags: |
