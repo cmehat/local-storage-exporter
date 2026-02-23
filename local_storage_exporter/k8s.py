@@ -19,9 +19,19 @@ _logger = utils.createLogger(__name__)
 
 
 def _sanitize_label_key(key: str) -> str:
-    """Replace characters invalid in Prometheus label names with underscores."""
-    return re.sub(r"[^a-zA-Z0-9_]", "_", key)
+    """Sanitize a string to be a valid Prometheus label name."""
+    # Replace any character not allowed in Prometheus label names with underscore
+    sanitized = re.sub(r"[^a-zA-Z0-9_]", "_", key)
 
+    # If everything was stripped out, fall back to a safe default
+    if not sanitized:
+        return "_"
+
+    # Prometheus label names must start with [a-zA-Z_]; prepend underscore if they don't
+    if not re.match(r"[a-zA-Z_]", sanitized[0]):
+        sanitized = "_" + sanitized
+
+    return sanitized
 class LocalStorageExporter:
     """
     A Kubernetes local storage exporter that monitors persistent volumes and mounted storage.
@@ -73,8 +83,47 @@ class LocalStorageExporter:
         self.pvc_label_keys = pvc_label_keys
         self.include_pvc_labels_blob = include_pvc_labels_blob
 
+        # Base label names used by the PV gauges; extra PVC labels must not collide with these.
+        base_labelnames = {
+            "node_name",
+            "pvc_name",
+            "pvc_namespace",
+            "pv_name",
+            "storage_path",
+            "pv_capacity",
+            "storage_class_name",
+            "pvc_labels",
+        }
+
+        # Sanitize PVC label keys once and validate for collisions.
+        sanitized_labelnames = [_sanitize_label_key(k) for k in self.pvc_label_keys]
+
+        # Check for collisions with base label names.
+        colliding_with_base = sorted(
+            {name for name in sanitized_labelnames if name in base_labelnames}
+        )
+        if colliding_with_base:
+            raise ValueError(
+                "Promoted PVC label keys collide with base label names after "
+                f"sanitization: {', '.join(colliding_with_base)}"
+            )
+
+        # Check for duplicate sanitized PVC label names.
+        seen = set()
+        duplicates = set()
+        for name in sanitized_labelnames:
+            if name in seen:
+                duplicates.add(name)
+            else:
+                seen.add(name)
+        if duplicates:
+            raise ValueError(
+                "Promoted PVC label keys result in duplicate label names after "
+                f"sanitization: {', '.join(sorted(duplicates))}"
+            )
+
         self.pv_used_bytes_gauge, self.pv_capacity_bytes_gauge = metrics.create_pv_gauges(
-            extra_labelnames=[_sanitize_label_key(k) for k in self.pvc_label_keys],
+            extra_labelnames=sanitized_labelnames,
             include_pvc_labels_blob=include_pvc_labels_blob,
         )
 
@@ -113,7 +162,6 @@ class LocalStorageExporter:
     def get_container(pod: V1Pod) -> client.V1Container:
         """
         Get the container from the pod that is running the local storage exporter using a name identifier.
-        # ÷
         Searches through the pod's containers to find the one with the exporter identifier
         in its name. The identifier can be customized via the EXPORTER_CONTAINER_NAME_IDENTIFIER
         environment variable.
